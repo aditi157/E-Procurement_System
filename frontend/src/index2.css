@@ -1,0 +1,123 @@
+/* ===== FORM STRUCTURE (MODALS) ===== */
+.form-group {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 16px;
+}
+
+.form-group label {
+  font-weight: 600;
+  margin-bottom: 6px;
+  color: #1e40af;
+}
+
+.form-group small {
+  font-size: 0.8rem;
+  color: #64748b;
+  margin-top: 4px;
+}
+
+/* Inputs inside modals */
+.modal-card input,
+.modal-card textarea,
+.modal-card select {
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid #cbd5e1;
+  font-size: 0.95rem;
+}
+
+.modal-card textarea {
+  resize: vertical;
+  min-height: 70px;
+}
+
+/* Multi-select styling */
+.multi-select {
+  min-height: 120px;
+}
+
+/* Bigger modal for auctions */
+.modal-large {
+  max-width: 900px;
+}
+
+/* Item rows */
+.item-row {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.item-row input:first-child {
+  flex: 3;
+}
+
+.item-row input:last-child {
+  flex: 1;
+}
+
+/* Section title inside modal */
+.section-title {
+  margin-top: 20px;
+  margin-bottom: 10px;
+  color: #1e40af;
+}
+
+/* Modal action buttons */
+.modal-actions {
+  margin-top: 24px;
+  display: flex;
+  gap: 12px;
+}
+/* ===== CATEGORY PILLS ===== */
+.category-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.category-pill {
+  padding: 8px 14px;
+  border-radius: 20px;
+  border: 1px solid #cbd5e1;
+  background: #f8fafc;
+  color: #334155;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.category-pill.active {
+  background: #2563eb;
+  color: white;
+  border-color: #2563eb;
+}
+
+/* ===== PRIMARY MODAL BUTTON ===== */
+.primary-btn {
+  width: 100%;
+  padding: 14px;
+  background: #2563eb;
+  color: white;
+  font-size: 1.05rem;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.primary-btn:hover {
+  background: #1e40af;
+}
+
+/* Stack modal buttons vertically */
+.modal-actions.vertical {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* ===== SCROLLABLE MODALS ===== */
+.modal-card {
+  max-height: 90vh;      /* Never exceed viewport */
+  overflow-y: auto;      /* Scroll inside modal */
+}
