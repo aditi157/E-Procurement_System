@@ -78,6 +78,18 @@ To provide a simple, transparent, and efficient e-procurement platform that impr
 
 ---
 
+## Branching Strategy
+
+This project follows GitHub Flow.
+
+- The `main` branch always contains stable and production-ready code
+- New features are developed in separate feature branches
+- Feature branches are merged back into `main` after completion
+
+Example feature branch:
+- `feature/auction-management`
+  
+---
 
 # Local Development Tools
 
@@ -88,7 +100,8 @@ To provide a simple, transparent, and efficient e-procurement platform that impr
 - VS Code
 - Figma (Wireframes)
 - Draw.io (Architecture Diagram)
-
+  
+---
 
 # Quick Start – Local Development
 
