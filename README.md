@@ -78,7 +78,7 @@ To provide a simple, transparent, and efficient e-procurement platform that impr
 
 ---
 
-## Branching Strategy
+# Branching Strategy
 
 This project follows GitHub Flow.
 
