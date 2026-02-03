@@ -79,3 +79,14 @@ To provide a simple, transparent, and efficient e-procurement platform that impr
 ---
 
 
+# Local Development Tools
+
+- React + Vite
+- Node.js
+- Docker Desktop
+- Git & GitHub
+- VS Code
+- Figma (Wireframes)
+- Draw.io (Architecture Diagram)
+
+
