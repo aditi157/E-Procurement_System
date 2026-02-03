@@ -90,3 +90,11 @@ To provide a simple, transparent, and efficient e-procurement platform that impr
 - Draw.io (Architecture Diagram)
 
 
+# Quick Start – Local Development
+
+## Using Docker
+
+1. Build the Docker image:
+   ```docker build -t e-procurement-app frontend```
+2. Run the Docker container:
+   ```docker run -p 5173:5173 e-procurement-app```
