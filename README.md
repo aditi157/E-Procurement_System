@@ -122,6 +122,6 @@ Example feature branch:
 
 ## Architecture Diagram:
 
-![Architecture Diagram](docs/design/architecture/layered-architecture.png)
+![Architecture Diagram](docs/design/architecture/architecture_diagram.png)
 
 See all UI screens in docs/design/UI.
