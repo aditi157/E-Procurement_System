@@ -111,3 +111,17 @@ Example feature branch:
    ```docker build -t e-procurement-app frontend```
 2. Run the Docker container:
    ```docker run -p 5173:5173 e-procurement-app```
+
+---
+
+# Architecture Overview and Design Choices
+
+1. The system follows a Layered Client-Server Architecture (Presentation Layer, Architecture Layer, Data Layer, Infrastructure Layer) that ensures separation of concerns, maintainability and scalability.
+2. MVC is applied internally within the backend to structure request handling and business logic.
+3. Business logic is separated into service modules for high cohesion, and role-based dashboards minimize feature overload.
+
+## Architecture Diagram:
+
+![Architecture Diagram](docs/design/architecture/layered-architecture.png)
+
+See all UI screens in docs/design/UI.
