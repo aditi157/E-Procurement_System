@@ -1,0 +1,53 @@
+flowchart TB
+
+%% PRESENTATION 
+subgraph L1["Presentation Layer"]
+    FE["React Frontend (Vite)"]
+    UI["Role-Based Dashboards
+    (Employee / Manager / Vendor / Finance)"]
+    FE --> UI
+end
+
+
+%% APPLICATION LAYER (MVC)
+subgraph L2["Application Layer (Backend - MVC)"]
+    CTRL["Controllers
+    (HTTP Request Handling)"]
+    SERV["Service Layer
+    (Business Logic)"]
+    MODEL["Models (Prisma ORM)
+    Data Access Layer"]
+
+    CTRL --> SERV
+    SERV --> MODEL
+end
+
+
+%% DATA 
+subgraph L3["Data Layer"]
+    DB[(MySQL Database)]
+    CACHE[(Redis Cache - Optional)]
+    LS[(LocalStorage - Prototype Only)]
+end
+
+          
+%% INFRASTRUCTURE LAYER
+subgraph L4["Infrastructure Layer"]
+    DOCKER["Docker Containers"]
+    DEPLOY["Cloud / VM Deployment"]
+end
+
+
+%% MAIN FLOW
+
+FE --> CTRL
+MODEL --> DB
+MODEL --> CACHE
+
+%% Prototype Flow
+FE --> LS
+
+%% Deployment Flow
+CTRL --> DOCKER
+DB --> DOCKER
+DOCKER --> DEPLOY
