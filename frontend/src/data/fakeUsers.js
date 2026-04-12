@@ -1,20 +1,20 @@
 const fakeUsers = [
   {
-    email: 'employee@company.com',
+    email: 'emp@demo.com',
     password: '1234',
     role: 'Employee',
     organizationName: 'ABC Corp',
     location: 'Head Office'
   },
   {
-    email: 'manager@company.com',
+    email: 'manager@demo.com',
     password: '1234',
     role: 'Manager',
     organizationName: 'ABC Corp',
     location: 'Procurement Dept'
   },
   {
-    email: 'vendor@supplier.com',
+    email: 'vendor@demo.com',
     password: '1234',
     role: 'Vendor',
     vendorId: 'vendor-001',   
@@ -22,7 +22,7 @@ const fakeUsers = [
     location: 'Mumbai'
   },
   {
-    email: 'finance@company.com',
+    email: 'finance@demo.com',
     password: '1234',
     role: 'Finance',
     organizationName: 'ABC Corp',

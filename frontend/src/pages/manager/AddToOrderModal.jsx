@@ -1,145 +1,83 @@
 import React, { useEffect, useState } from 'react'
-
-const STORAGE_KEY = 'manager_orders'
+import axios from "axios"
 
 const AddToOrderModal = ({ request, onClose }) => {
-  const [allOrders, setAllOrders] = useState([])
   const [draftOrders, setDraftOrders] = useState([])
   const [selectedOrderId, setSelectedOrderId] = useState(null)
-  const [mode, setMode] = useState('existing') // existing | new
-  const [alreadyAdded, setAlreadyAdded] = useState(false)
-  const [forceAdd, setForceAdd] = useState(false)
+  const [mode, setMode] = useState('existing')
   const [successMsg, setSuccessMsg] = useState('')
 
-  /* ---------- LOAD ORDERS ---------- */
-  useEffect(() => {
-    const stored = JSON.parse(localStorage.getItem(STORAGE_KEY)) || []
-    setAllOrders(stored)
+  const user = JSON.parse(localStorage.getItem("user"))
 
-    const drafts = stored.filter(o => o.status === 'Draft')
-    setDraftOrders(drafts)
+  /* ---------- LOAD ORDERS FROM BACKEND ---------- */
+  const loadOrders = async () => {
+    try {
+      const res = await axios.get("http://localhost:5000/api/orders")
 
-    const found = stored.some(
-      o => Array.isArray(o.sourceRequests) && o.sourceRequests.includes(request.id)
-    )
-    setAlreadyAdded(found)
+      const drafts = res.data.filter(o => o.status === "DRAFT")
+      setDraftOrders(drafts)
 
-    if (drafts.length === 0) {
-      setMode('new')
-    }
-  }, [request.id])
-
-  /* ---------- HELPERS ---------- */
-  const mergeItems = (existing = [], incoming = []) => {
-    const merged = [...existing]
-
-    incoming.forEach(item => {
-      const found = merged.find(i => i.name === item.name)
-      if (found) {
-        found.quantity += item.quantity
-      } else {
-        merged.push({ ...item })
+      if (drafts.length === 0) {
+        setMode("new")
       }
-    })
-
-    return merged
+    } catch (err) {
+      console.error(err)
+    }
   }
 
-  const generateUniqueOrderName = () => {
-    const ts = Date.now()
-    const rand = Math.random().toString(36).slice(2, 6).toUpperCase()
-    return `Order-${ts}-${rand}`
+  useEffect(() => {
+    loadOrders()
+  }, [])
+
+  /* ---------- CREATE NEW ORDER ---------- */
+  const createNewOrder = async () => {
+    try {
+      await axios.post("http://localhost:5000/api/orders", {
+        requestId: request.id,
+        managerId: user.id
+      })
+
+      setSuccessMsg("Order draft created successfully")
+    } catch (err) {
+      console.error(err)
+      alert("Failed to create order")
+    }
   }
 
-  /* ---------- ACTIONS ---------- */
-  const addToExistingOrder = () => {
+  /* ---------- ADD TO EXISTING ORDER ---------- */
+  const addToExistingOrder = async () => {
     if (!selectedOrderId) return
 
-    const updated = allOrders.map(order => {
-      if (order.id !== selectedOrderId) return order
+    try {
+      await axios.post(
+        `http://localhost:5000/api/orders/${selectedOrderId}/add`,
+        {
+          requestId: request.id
+        }
+      )
 
-      return {
-        ...order,
-        items: mergeItems(order.items, request.items),
-        sourceRequests: Array.isArray(order.sourceRequests)
-          ? order.sourceRequests.includes(request.id)
-            ? order.sourceRequests
-            : [...order.sourceRequests, request.id]
-          : [request.id]
-      }
-    })
-
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(updated))
-    setSuccessMsg('Request added to selected order draft.')
-  }
-
-  const createNewOrder = () => {
-    const newOrder = {
-      id: `ORD-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
-      name: generateUniqueOrderName(),
-      status: 'Draft',
-      createdAt: new Date().toISOString(),
-      items: request.items.map(i => ({ ...i })),
-      sourceRequests: [request.id]
+      setSuccessMsg("Added to existing order")
+    } catch (err) {
+      console.error(err)
+      alert("Failed to add to order")
     }
-
-    const updated = [...allOrders, newOrder]
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(updated))
-    setSuccessMsg('Request added to new order draft.')
   }
 
-  /* ---------- UI ---------- */
   return (
     <div className="modal-overlay" onClick={onClose}>
-      <div
-        className="modal-card"
-        onClick={(e) => e.stopPropagation()}
-      >
+      <div className="modal-card" onClick={(e) => e.stopPropagation()}>
         <h2>Add Request to Order</h2>
 
-        {/* SUCCESS MESSAGE */}
+        {/* SUCCESS */}
         {successMsg && (
-          <div
-            style={{
-              background: '#ecfeff',
-              border: '1px solid #22d3ee',
-              padding: 16,
-              borderRadius: 10,
-              marginBottom: 20,
-              color: '#0f172a'
-            }}
-          >
-            <p style={{ marginBottom: 12 }}>{successMsg}</p>
-            <button className="primary-btn" onClick={onClose}>
-              Close
-            </button>
+          <div className="success-box">
+            <p>{successMsg}</p>
+            <pre> </pre>
+            <button class="primary-btn" onClick={onClose}>Close</button>
           </div>
         )}
 
-        {!successMsg && alreadyAdded && !forceAdd && (
-          <div
-            style={{
-              background: '#eff6ff',
-              border: '1px solid #2563eb',
-              padding: 16,
-              borderRadius: 10,
-              marginBottom: 20,
-              color: '#1e40af'
-            }}
-          >
-            <p style={{ marginBottom: 10 }}>
-              This request has already been added to an order.
-            </p>
-            <button
-              className="primary-btn"
-              onClick={() => setForceAdd(true)}
-            >
-              Add to another order
-            </button>
-          </div>
-        )}
-
-        {!successMsg && (!alreadyAdded || forceAdd) && (
+        {!successMsg && (
           <>
             <div className="form-group">
               <label>Choose action</label>
@@ -148,7 +86,7 @@ const AddToOrderModal = ({ request, onClose }) => {
                 onChange={(e) => setMode(e.target.value)}
               >
                 <option value="existing">Add to existing draft</option>
-                <option value="new">Create new draft order</option>
+                <option value="new">Create new draft</option>
               </select>
             </div>
 
@@ -159,7 +97,7 @@ const AddToOrderModal = ({ request, onClose }) => {
                     <th></th>
                     <th>Order</th>
                     <th>Created</th>
-                    <th>Items</th>
+                    <th>Status</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -168,28 +106,27 @@ const AddToOrderModal = ({ request, onClose }) => {
                       <td>
                         <input
                           type="radio"
-                          name="order"
                           checked={selectedOrderId === o.id}
                           onChange={() => setSelectedOrderId(o.id)}
                         />
                       </td>
                       <td>{o.name}</td>
                       <td>{new Date(o.createdAt).toLocaleDateString()}</td>
-                      <td>{o.items.length}</td>
+                      <td>{o.status}</td>
                     </tr>
                   ))}
                 </tbody>
               </table>
             )}
 
-            <div className="modal-actions vertical">
+            <div className="modal-actions">
               {mode === 'existing' ? (
-                <button className="primary-btn" onClick={addToExistingOrder}>
+                <button class="primary-btn" onClick={addToExistingOrder}>
                   Add to Selected Order
                 </button>
               ) : (
-                <button className="primary-btn" onClick={createNewOrder}>
-                  Create New Draft Order
+                <button onClick={createNewOrder}>
+                  Create New Order
                 </button>
               )}
 

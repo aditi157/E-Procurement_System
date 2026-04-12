@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react'
+import axios from "axios"
 
 const catalog = {
   'IT Equipment': [
@@ -76,17 +77,29 @@ const removeItem = (id) => {
   const totalAmount = () =>
     cart.reduce((sum, i) => sum + i.price * i.quantity, 0)
 
-  const saveDraft = () => {
-    if (cart.length === 0) return
 
-    onSave({
-      id: existingDraft?.id || `DRAFT-${Date.now()}`,
-      name: draftName,
-      status: 'Draft',
-      createdAt: existingDraft?.createdAt || new Date().toISOString(),
-      items: cart
+
+const user = JSON.parse(localStorage.getItem("user"))
+
+const saveDraft = async () => {
+  if (cart.length === 0) return
+
+  try {
+    await axios.post("http://localhost:5000/api/orders/manual", {
+      managerId: user.id,
+      items: cart.map(i => ({
+        name: i.name,
+        quantity: i.quantity,
+        unitPrice: i.price
+      }))
     })
+
+    onClose()
+  } catch (err) {
+    console.error(err)
+    alert("Failed to save draft")
   }
+}
 
   const showToast = (msg) => {
     setToast(msg)

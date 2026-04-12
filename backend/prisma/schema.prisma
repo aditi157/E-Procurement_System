@@ -1,0 +1,241 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+
+
+
+model User {
+  id        String   @id @default(uuid())
+  name      String
+  email     String   @unique
+  password  String
+  role      String   // EMPLOYEE | MANAGER | VENDOR | FINANCE
+  orgName String?
+  createdAt DateTime @default(now())
+
+  employeeRequests Request[] @relation("EmployeeRequests")
+  approvals        Approval[] @relation("ManagerApprovals")
+  ordersManaged    Order[]
+  vendorOrders     VendorOrder[]
+  paymentsHandled  Payment[]
+
+  auctions Auction[]
+  auctionInvites AuctionInvite[]
+
+  ordersReceived Order[] @relation("VendorOrders")
+  bids Bid[]
+}
+
+
+
+
+model Request {
+  id          String   @id @default(uuid())
+  title       String
+  description String
+  totalAmount Float
+  status      String   @default("PENDING")
+  createdAt   DateTime @default(now())
+
+  employeeId String
+  employee   User @relation("EmployeeRequests", fields: [employeeId], references: [id])
+
+  items RequestItem[]
+
+  approval Approval?
+
+  orderId String?       
+  order   Order? @relation(fields: [orderId], references: [id]) 
+
+  auctions Auction[]
+
+}
+
+
+
+model RequestItem {
+  id        String  @id @default(uuid())
+  name      String
+  quantity  Int
+  unitPrice Float
+
+  requestId String
+  request   Request @relation(fields: [requestId], references: [id])
+}
+
+
+
+
+model Approval {
+  id        String   @id @default(uuid())
+  status    String   // APPROVED | REJECTED
+  comments  String?
+  createdAt DateTime @default(now())
+
+  requestId String @unique
+  request   Request @relation(fields: [requestId], references: [id])
+
+  managerId String
+  manager   User @relation("ManagerApprovals", fields: [managerId], references: [id])
+}
+
+
+
+
+
+model Order {
+  id        String   @id @default(uuid())
+  name      String
+  status    String   @default("DRAFT")
+  createdAt DateTime @default(now())
+
+  managerId String
+  manager   User @relation(fields: [managerId], references: [id])
+
+ vendorId String?     
+  vendor   User? @relation("VendorOrders", fields: [vendorId], references: [id])
+
+  requests  Request[] 
+
+  items OrderItem[]
+
+  vendorOrder VendorOrder?
+
+  expectedDelivery DateTime?
+deliveredAt DateTime?
+}
+
+
+
+
+model OrderItem {
+  id        String  @id @default(uuid())
+  name      String
+  quantity  Int
+  unitPrice Float
+
+  orderId String
+  order   Order @relation(fields: [orderId], references: [id])
+}
+
+
+
+
+model VendorOrder {
+  id        String   @id @default(uuid())
+  status    String   @default("PENDING") // PENDING | FULFILLED
+  createdAt DateTime @default(now())
+
+  orderId String @unique
+  order   Order @relation(fields: [orderId], references: [id])
+
+  vendorId String
+  vendor   User @relation(fields: [vendorId], references: [id])
+
+  invoice Invoice?
+}
+
+
+
+
+
+model Payment {
+  id        String   @id @default(uuid())
+  amount    Float
+  status    String   @default("PENDING") // PENDING | COMPLETED
+  paidAt    DateTime?
+
+  invoiceId String @unique
+  invoice   Invoice @relation(fields: [invoiceId], references: [id])
+
+  financeId String
+  finance   User @relation(fields: [financeId], references: [id])
+}
+
+
+
+model Auction {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  status      String   // ONGOING | SCHEDULED | COMPLETED
+
+  startDate   DateTime
+  endDate     DateTime
+  deliveryDate DateTime
+
+  createdAt   DateTime @default(now())
+
+  managerId String
+  manager   User @relation(fields: [managerId], references: [id])
+
+  items AuctionItem[]
+
+  requestId String?   // optional link to request
+  request   Request? @relation(fields: [requestId], references: [id])
+  invites AuctionInvite[]
+  bids Bid[]
+}
+
+
+
+model AuctionItem {
+  id        String @id @default(uuid())
+  name      String
+  quantity  Int
+
+  auctionId String
+  auction   Auction @relation(fields: [auctionId], references: [id])
+
+}
+
+
+model AuctionInvite {
+  id String @id @default(uuid())
+
+  auctionId String
+  auction   Auction @relation(fields: [auctionId], references: [id])
+
+  vendorId String
+  vendor   User @relation(fields: [vendorId], references: [id])
+}
+
+
+model Bid {
+  id           String   @id @default(uuid())
+  amount       Float
+  deliveryDate DateTime
+  notes        String?
+
+  status       String   @default("PENDING")
+  createdAt    DateTime @default(now())
+
+  auctionId    String
+  auction      Auction  @relation(fields: [auctionId], references: [id])
+
+  vendorId     String
+  vendor       User     @relation(fields: [vendorId], references: [id])
+}
+
+model Invoice {
+  id            String   @id @default(uuid())
+
+  invoiceNumber String
+  totalAmount   Float
+  issuedAt      DateTime @default(now())
+  status String @default("SUBMITTED")
+
+  dueDate       DateTime?
+  notes         String?
+
+  vendorOrderId String @unique
+  vendorOrder   VendorOrder @relation(fields: [vendorOrderId], references: [id])
+
+  payment Payment?
+}

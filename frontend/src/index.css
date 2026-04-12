@@ -348,12 +348,12 @@ body {
 
 .modal-close {
   width: 100%;
-  margin-top: 10px;
-  padding: 10px;
+  padding: 14px;
   background: #e5e7eb;
   color: #1f2937;
+  font-size: 1.05rem;
   border: none;
-  border-radius: 8px;
+  border-radius: 10px;
   cursor: pointer;
 }
 

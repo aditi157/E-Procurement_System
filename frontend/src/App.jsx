@@ -33,6 +33,7 @@ import { Routes, Route, Navigate } from 'react-router-dom'
 // Public pages
 import LandingPage from './pages/LandingPage'
 import LoginPage from './pages/LoginPage'
+import Register from "./pages/Register"
 
 // Dashboards
 import EmployeeDashboard from './pages/employee/EmployeeDashboard'
@@ -179,6 +180,7 @@ function App() {
       <Route path="/manager/*" element={<ManagerDashboard />} />
       <Route path="/vendor/*" element={<VendorDashboard />} />
       <Route path="/finance/*" element={<FinanceDashboard />} />
+      <Route path="/register" element={<Register />} />
 
       {/* Fallback */}
       <Route path="*" element={<Navigate to="/" replace />} />

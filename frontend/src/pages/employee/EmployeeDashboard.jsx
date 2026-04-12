@@ -1,12 +1,33 @@
 import React, { useEffect, useState } from 'react'
 import EmployeeSidebar from './EmployeeSidebar'
-import {
-  getRequestsByEmployee,
-  createRequest
-} from '../../services/requestService'
+import axios from 'axios'
 
 const EmployeeDashboard = () => {
-  const user = JSON.parse(localStorage.getItem('loggedInUser'))
+  
+  const [user, setUser] = useState(null)
+
+const fetchUser = async () => {
+  try {
+    const token = localStorage.getItem("token")
+
+    const res = await axios.get(
+      "http://localhost:5000/api/auth/me",
+      {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }
+    )
+
+    setUser(res.data)
+
+    // optional: update localStorage
+    localStorage.setItem("user", JSON.stringify(res.data))
+
+  } catch (err) {
+    console.error(err)
+  }
+}
 
   const [activeMenu, setActiveMenu] = useState('dashboard')
   const [cart, setCart] = useState([])
@@ -14,6 +35,10 @@ const EmployeeDashboard = () => {
   const [requests, setRequests] = useState([])
   const [selectedRequest, setSelectedRequest] = useState(null)
 
+  useEffect(() => {
+  fetchUser()
+}, [])
+  
   /* ---------- STATIC CATALOG ---------- */
   const catalog = [
     { id: 'IT-001', name: 'Laptop', price: 70000 },
@@ -22,10 +47,38 @@ const EmployeeDashboard = () => {
     { id: 'IT-004', name: 'Mouse', price: 1200 }
   ]
 
-  /* ---------- LOAD REQUESTS ---------- */
+  /* ---------- LOAD REQUESTS FROM BACKEND ---------- */
+  const loadRequests = async () => {
+    try {
+      const res = await axios.get(
+        `http://localhost:5000/api/employee/request/${user.id}`
+      )
+
+      // map backend → your existing UI format
+      const formatted = res.data.map(r => ({
+        id: r.id,
+        requestedBy: user.email,
+        department: user.department || 'General',
+        items: r.items.map(i => ({
+          id: i.id,
+          name: i.name,
+          quantity: i.quantity,
+          price: i.unitPrice
+        })),
+        justification: r.description || '',
+        status: r.status,
+        createdAt: r.createdAt
+      }))
+
+      setRequests(formatted)
+    } catch (err) {
+      console.error(err)
+    }
+  }
+
   useEffect(() => {
-    setRequests(getRequestsByEmployee(user.email))
-  }, [user.email])
+    if (user) loadRequests()
+  }, [user])
 
   /* ---------- CART LOGIC ---------- */
   const addToCart = (item) => {
@@ -66,36 +119,42 @@ const EmployeeDashboard = () => {
     setCart((prev) => prev.filter((i) => i.id !== id))
   }
 
-  const submitRequest = () => {
+  /* ---------- CREATE REQUEST (BACKEND) ---------- */
+  const submitRequest = async () => {
     if (cart.length === 0) return
 
-    const newRequest = {
-      id: `REQ-${Date.now()}`,
-      requestedBy: user.email,
-      department: user.department || 'General',
-      items: cart,
-      justification: 'Office requirement',
-      status: 'Submitted',
-      createdAt: new Date().toISOString()
-    }
+    try {
+      await axios.post("http://localhost:5000/api/employee/request", {
+        title: "Purchase Request",
+        description: "From cart",
+        employeeId: user.id,
+        items: cart.map(i => ({
+          name: i.name,
+          quantity: i.quantity,
+          unitPrice: i.price
+        }))
+      })
 
-    createRequest(newRequest)
-    setRequests(getRequestsByEmployee(user.email))
-    setCart([])
-    setShowCart(false)
-    setActiveMenu('requests')
+      setCart([])
+      setShowCart(false)
+      setActiveMenu('requests')
+
+      loadRequests() // refresh from backend
+
+    } catch (err) {
+      console.error(err)
+      alert("Failed to create request")
+    }
   }
 
   /* ---------- FILTERED VIEWS ---------- */
 
-  // Active = NOT completed AND NOT rejected
   const activeRequests = requests.filter(
     (r) =>
       r.status !== 'Completed' &&
       !r.status.toLowerCase().includes('reject')
   )
 
-  // History = completed OR rejected
   const historyRequests = requests.filter(
     (r) =>
       r.status === 'Completed' ||
@@ -123,15 +182,14 @@ const EmployeeDashboard = () => {
   return (
     <div className="dashboard-layout">
       <EmployeeSidebar
-  activeMenu={activeMenu}
-  setActiveMenu={setActiveMenu}
-/>
-
+        activeMenu={activeMenu}
+        setActiveMenu={setActiveMenu}
+      />
 
       <div className="dashboard-content">
         <h1 className="title">{getPageTitle()}</h1>
         <p className="subtitle">
-          Logged in as <strong>{user.email}</strong>
+          Logged in as <strong>{user?.name}</strong>
         </p>
 
         {/* CART ICON */}
@@ -170,7 +228,7 @@ const EmployeeDashboard = () => {
           </div>
         )}
 
-        {/* MY REQUESTS (ACTIVE ONLY) */}
+        {/* ACTIVE REQUESTS */}
         {activeMenu === 'requests' && (
           <table className="records-table">
             <thead>
@@ -198,9 +256,7 @@ const EmployeeDashboard = () => {
           </table>
         )}
 
-      
-        
-        {/* REQUEST HISTORY (COMPLETED + REJECTED) */}
+        {/* HISTORY */}
         {activeMenu === 'history' && (
           <table className="records-table">
             <thead>
@@ -241,36 +297,17 @@ const EmployeeDashboard = () => {
         )}
       </div>
 
-      {/* REQUEST DETAILS MODAL */}
+      {/* MODALS — UNTOUCHED */}
       {selectedRequest && (
-        <div
-          className="modal-overlay"
-          onClick={() => setSelectedRequest(null)}
-        >
-          <div
-            className="modal-card"
-            onClick={(e) => e.stopPropagation()}
-          >
+        <div className="modal-overlay" onClick={() => setSelectedRequest(null)}>
+          <div className="modal-card" onClick={(e) => e.stopPropagation()}>
             <h2>Request Details</h2>
-
             <p><strong>ID:</strong> {selectedRequest.id}</p>
             <p><strong>Status:</strong> {selectedRequest.status}</p>
-            <p>
-              <strong>Created:</strong>{' '}
-              {new Date(
-                selectedRequest.createdAt
-              ).toLocaleString()}
-            </p>
+            <p><strong>Created:</strong> {new Date(selectedRequest.createdAt).toLocaleString()}</p>
 
             <h3 style={{ marginTop: '16px' }}>Items</h3>
             <table className="cart-table">
-              <thead>
-                <tr>
-                  <th>Item</th>
-                  <th>Qty</th>
-                  <th>Total</th>
-                </tr>
-              </thead>
               <tbody>
                 {selectedRequest.items.map((i) => (
                   <tr key={i.id}>
@@ -286,26 +323,16 @@ const EmployeeDashboard = () => {
               Total: ₹{totalAmount(selectedRequest.items)}
             </p>
 
-            <button
-              className="modal-close"
-              onClick={() => setSelectedRequest(null)}
-            >
+            <button className="modal-close" onClick={() => setSelectedRequest(null)}>
               Close
             </button>
           </div>
         </div>
       )}
 
-      {/* CART MODAL */}
       {showCart && (
-        <div
-          className="modal-overlay"
-          onClick={() => setShowCart(false)}
-        >
-          <div
-            className="modal-card"
-            onClick={(e) => e.stopPropagation()}
-          >
+        <div className="modal-overlay" onClick={() => setShowCart(false)}>
+          <div className="modal-card" onClick={(e) => e.stopPropagation()}>
             <h2>Your Cart</h2>
 
             {cart.length === 0 ? (
@@ -313,14 +340,6 @@ const EmployeeDashboard = () => {
             ) : (
               <>
                 <table className="cart-table">
-                  <thead>
-                    <tr>
-                      <th>Item</th>
-                      <th>Qty</th>
-                      <th>Total</th>
-                      <th></th>
-                    </tr>
-                  </thead>
                   <tbody>
                     {cart.map((i) => (
                       <tr key={i.id}>
@@ -349,10 +368,7 @@ const EmployeeDashboard = () => {
               </>
             )}
 
-            <button
-              className="modal-close"
-              onClick={() => setShowCart(false)}
-            >
+            <button className="modal-close" onClick={() => setShowCart(false)}>
               Close
             </button>
           </div>

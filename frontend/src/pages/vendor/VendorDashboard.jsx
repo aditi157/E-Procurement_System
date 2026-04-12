@@ -1,155 +1,314 @@
-import React, { useEffect, useState } from 'react'
-
-const VENDOR_ID = 'vendor-001'
+import React, { useEffect, useState } from "react"
+import axios from "axios"
+import VendorSidebar from "./VendorSidebar"
+import VendorOrderModal from "./VendorOrderModal"
+import VendorAuctionModal from "./VendorAuctionModal"
+import VendorInvoices from "./VendorInvoices"
 
 const VendorDashboard = () => {
-  const [activeTab, setActiveTab] = useState('dashboard')
+  const [activeMenu, setActiveMenu] = useState("dashboard")
+const [selectedOrder, setSelectedOrder] = useState(null)
+const [selectedAuction, setSelectedAuction] = useState(null)
   const [orders, setOrders] = useState([])
   const [auctions, setAuctions] = useState([])
 
-  useEffect(() => {
-    const allOrders =
-      JSON.parse(localStorage.getItem('manager_orders')) || []
-    setOrders(allOrders.filter(o => o.vendorId === VENDOR_ID))
+  const user = JSON.parse(localStorage.getItem("user"))
 
-    const allAuctions =
-      JSON.parse(localStorage.getItem('auctions')) || []
-    setAuctions(allAuctions)
+  /* ---------- LOAD ORDERS ---------- */
+  const loadOrders = async () => {
+    try {
+      const res = await axios.get(
+        `http://localhost:5000/api/vendor/orders/${user.id}`
+      )
+
+      setOrders(res.data)
+
+    } catch (err) {
+      console.error(err)
+    }
+  }
+
+  /* ---------- LOAD AUCTIONS ---------- */
+  const loadAuctions = async () => {
+    try {
+      const res = await axios.get(
+        `http://localhost:5000/api/vendor/auctions/${user.id}`
+      )
+
+      setAuctions(res.data)
+
+    } catch (err) {
+      console.error(err)
+    }
+  }
+
+  useEffect(() => {
+    loadOrders()
+    loadAuctions()
   }, [])
 
-  const activeOrders = orders.filter(o => o.status !== 'Paid')
-  const orderHistory = orders.filter(o => o.status === 'Paid')
+  /* ---------- ACTIONS ---------- */
 
-  const invited = auctions.filter(
-    a => a.invitedVendors?.includes(VENDOR_ID) && a.status === 'Open'
-  )
-  const open = auctions.filter(a => a.openToAll && a.status === 'Open')
-  const ongoing = auctions.filter(
-    a => a.bids?.some(b => b.vendorId === VENDOR_ID) && a.status === 'Open'
-  )
-  const history = auctions.filter(a => a.status === 'Closed')
+  const acceptOrder = async (orderId) => {
+    await axios.post(`http://localhost:5000/api/vendor/orders/${orderId}/accept`)
+    loadOrders()
+  }
 
-  const AuctionCard = ({ auction }) => (
-    <div className="catalog-card">
-      <h3>{auction.title}</h3>
-      <p>Status: {auction.status}</p>
-      <button>View Auction</button>
-    </div>
+  const rejectOrder = async (orderId) => {
+    await axios.post(`http://localhost:5000/api/vendor/orders/${orderId}/reject`)
+    loadOrders()
+  }
+
+  const markDelivered = async (orderId) => {
+    await axios.post(`http://localhost:5000/api/vendor/orders/${orderId}/deliver`)
+    loadOrders()
+  }
+
+  /* ---------- FILTERS ---------- */
+  const activeOrders = orders.filter(o =>
+    ["SUBMITTED", "ACCEPTED"].includes(o.status)
   )
+
+  const historyOrders = orders.filter(o =>
+    ["REJECTED", "DELIVERED"].includes(o.status)
+  )
+
+  const activeAuctions = auctions.filter(
+  a =>
+    a.status !== "COMPLETED" &&
+    a.status !== "SELECTED" &&
+    a.status !== "REJECTED" &&
+    new Date(a.endDate) > new Date()
+)
+
+const auctionHistory = auctions.filter(
+  a =>
+    a.status === "COMPLETED" ||
+    a.status === "SELECTED" ||
+    a.status === "REJECTED" ||
+    new Date(a.endDate) <= new Date()
+)
 
   return (
     <div className="dashboard-layout">
-      {/* SIDEBAR */}
-      <div className="sidebar">
-        <h2 className="sidebar-title">Vendor</h2>
-        <ul className="sidebar-menu">
-          <li className={activeTab === 'dashboard' ? 'active' : ''} onClick={() => setActiveTab('dashboard')}>
-            Dashboard
-          </li>
-          <li className={activeTab === 'orders' ? 'active' : ''} onClick={() => setActiveTab('orders')}>
-            Orders
-          </li>
-          <li className={activeTab === 'orderHistory' ? 'active' : ''} onClick={() => setActiveTab('orderHistory')}>
-            Order History
-          </li>
-          <li className={activeTab === 'auctions' ? 'active' : ''} onClick={() => setActiveTab('auctions')}>
-            Auctions
-          </li>
-          <li className="logout">Logout</li>
-        </ul>
-      </div>
 
-      {/* CONTENT */}
+      {/* SIDEBAR */}
+      <VendorSidebar
+        activeMenu={activeMenu}
+        setActiveMenu={setActiveMenu}
+      />
+
+      {/* MAIN CONTENT */}
       <div className="dashboard-content">
-        <h1>Vendor Dashboard</h1>
+
+        <h1 className="title">
+          {activeMenu === "dashboard"
+            ? "Vendor Dashboard"
+            : activeMenu === "orders"
+            ? "Orders"
+            : activeMenu === "auctions"
+            ? "Auctions"
+            : activeMenu === "invoices"
+            ? "Invoices"  
+            : "Profile"}
+        </h1>
+
+        <p className="subtitle">
+          Logged in as <strong>{user?.email}</strong>
+        </p>
 
         {/* DASHBOARD */}
-        {activeTab === 'dashboard' && (
+        {activeMenu === "dashboard" && (
           <div className="section">
-            <p><strong>Active Orders:</strong> {activeOrders.length}</p>
-            <p><strong>Invited Auctions:</strong> {invited.length}</p>
-            <p><strong>Open Auctions:</strong> {open.length}</p>
+            <p>Active Orders: {activeOrders.length}</p>
+            <p>Auction Invites: {auctions.length}</p>
           </div>
         )}
 
         {/* ORDERS */}
-        {activeTab === 'orders' && (
+        {activeMenu === "orders" && (
           <div className="section">
-            <h2>Active Orders</h2>
-            <table className="records-table">
-              <thead>
-                <tr>
-                  <th>Order</th>
-                  <th>Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                {activeOrders.map(o => (
-                  <tr key={o.id}>
-                    <td>{o.name}</td>
-                    <td>{o.status}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
 
-        {/* ORDER HISTORY */}
-        {activeTab === 'orderHistory' && (
-          <div className="section">
-            <h2>Order History</h2>
-            <table className="records-table">
-              <thead>
-                <tr>
-                  <th>Order</th>
-                  <th>Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                {orderHistory.map(o => (
-                  <tr key={o.id}>
-                    <td>{o.name}</td>
-                    <td>{o.status}</td>
+            <h2>Assigned Orders</h2>
+
+            {activeOrders.length === 0 ? (
+              <p>No active orders.</p>
+            ) : (
+              <table className="records-table">
+                <thead>
+                  <tr>
+                    <th>Order</th>
+                    <th>Status</th>
+                    <th>Items</th>
+                    <th>Actions</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+
+                <tbody>
+                  {activeOrders.map(o => (
+                    <tr key={o.id} style={{ cursor: "pointer" }} onClick={() => setSelectedOrder(o)}>
+                      <td>{o.name}</td>
+                      <td>{o.status}</td>
+                      <td>{o.items.map(i => i.name).join(", ")}</td>
+
+                      <td>
+                        {o.status === "SUBMITTED" && (
+                          <>
+                            <button onClick={() => acceptOrder(o.id)}>
+                              Accept
+                            </button>
+
+                            <button onClick={() => rejectOrder(o.id)}>
+                              Reject
+                            </button>
+                          </>
+                        )}
+
+                        {o.status === "ACCEPTED" && (
+                          <button className="primary-btn" onClick={() => markDelivered(o.id)}>
+                            Mark Delivered
+                          </button>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+
+            {/* HISTORY */}
+            <h2 style={{ marginTop: 40 }}>Order History</h2>
+
+{historyOrders.length === 0 ? (
+  <p>No completed orders.</p>
+) : (
+  <table className="records-table">
+    <thead>
+      <tr>
+        <th>Order</th>
+        <th>Status</th>
+        <th>Items</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      {historyOrders.map(o => (
+        <tr
+          key={o.id}
+          style={{ cursor: "pointer" }}
+          onClick={() => setSelectedOrder(o)}
+        >
+          <td>{o.name}</td>
+          <td>{o.status}</td>
+          <td>{o.items.map(i => i.name).join(", ")}</td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+)}
           </div>
         )}
 
         {/* AUCTIONS */}
-        {activeTab === 'auctions' && (
-          <>
-            <div className="section">
-              <h2>Invitations</h2>
-              <div className="catalog-grid">
-                {invited.map(a => <AuctionCard key={a.id} auction={a} />)}
-              </div>
-            </div>
+       {activeMenu === "auctions" && (
+  <div className="section">
 
-            <div className="section">
-              <h2>Open Auctions</h2>
-              <div className="catalog-grid">
-                {open.map(a => <AuctionCard key={a.id} auction={a} />)}
-              </div>
-            </div>
+    <h2>Invited Auctions</h2>
 
-            <div className="section">
-              <h2>Ongoing Auctions</h2>
-              <div className="catalog-grid">
-                {ongoing.map(a => <AuctionCard key={a.id} auction={a} />)}
-              </div>
-            </div>
+    {activeAuctions.length === 0 ? (
+      <p>No active auction invites.</p>
+    ) : (
+      <table className="records-table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Organization</th>
+            <th>Closes</th>
+            <th>Delivery</th>
+          </tr>
+        </thead>
 
-            <div className="section">
-              <h2>Auction History</h2>
-              <div className="catalog-grid">
-                {history.map(a => <AuctionCard key={a.id} auction={a} />)}
-              </div>
-            </div>
-          </>
+        <tbody>
+          {activeAuctions.map(a => (
+            <tr
+              key={a.id}
+              onClick={() => setSelectedAuction(a)}
+              style={{ cursor: "pointer" }}
+            >
+              <td>{a.name}</td>
+              <td>{a.manager?.organizationName || "-"}</td>
+              <td>{new Date(a.endDate).toLocaleString()}</td>
+              <td>{new Date(a.deliveryDate).toLocaleDateString()}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    )}
+
+    <h2 style={{ marginTop: 40 }}>Auction History</h2>
+
+    {auctionHistory.length === 0 ? (
+      <p>No auction history.</p>
+    ) : (
+      <table className="records-table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Organization</th>
+            <th>Status</th>
+            <th>Closed</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {auctionHistory.map(a => (
+            <tr
+              key={a.id}
+              onClick={() => setSelectedAuction(a)}
+              style={{ cursor: "pointer" }}
+            >
+              <td>{a.name}</td>
+              <td>{a.manager?.organizationName || "-"}</td>
+              <td>{a.status}</td>
+              <td>{new Date(a.endDate).toLocaleString()}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    )}
+
+  </div>
+)}
+
+
+{/* INVOICES */}
+{activeMenu === 'invoices' && (
+  <VendorInvoices />
+)}
+        
+
+        {/* PROFILE */}
+        {activeMenu === "profile" && (
+          <div className="section">
+            <p><strong>Email:</strong> {user?.email}</p>
+            <p><strong>Role:</strong> {user?.role}</p>
+          </div>
         )}
+
+        {selectedOrder && (
+  <VendorOrderModal
+    order={selectedOrder}
+    onClose={() => setSelectedOrder(null)}
+  />
+)}
+
+{selectedAuction && (
+  <VendorAuctionModal
+    auction={selectedAuction}
+    onClose={() => setSelectedAuction(null)}
+  />
+)}
+
       </div>
     </div>
   )

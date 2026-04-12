@@ -1,23 +1,15 @@
 import React, { useState } from 'react'
-import { useLocation, useNavigate } from 'react-router-dom'
-import fakeUsers from '../data/fakeUsers'
+import { useNavigate } from 'react-router-dom'
+import axios from 'axios'
 
-/*
-  LoginPage
-  - Authenticates user
-  - Redirects based on role
-*/
 const LoginPage = () => {
-  const location = useLocation()
   const navigate = useNavigate()
-
-  const selectedRole = location.state?.role || 'User'
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault()
     setError('')
 
@@ -26,33 +18,33 @@ const LoginPage = () => {
       return
     }
 
-    const user = fakeUsers.find(
-      (u) => u.email === email && u.role === selectedRole
-    )
+    try {
+      const res = await axios.post(
+        "http://localhost:5000/api/auth/login",
+        { email, password }
+      )
 
-    if (!user) {
-      setError('No account found for this role and email.')
-      return
+      const { user, token } = res.data
+
+      // Save user + token
+      localStorage.setItem('user', JSON.stringify(user))
+      localStorage.setItem('token', token)
+
+      // Role-based redirect (IMPORTANT: match backend roles)
+      if (user.role === 'EMPLOYEE') navigate('/employee')
+      if (user.role === 'MANAGER') navigate('/manager')
+      if (user.role === 'VENDOR') navigate('/vendor')
+      if (user.role === 'FINANCE') navigate('/finance')
+
+    } catch (err) {
+      console.error(err)
+      setError(err.response?.data?.message || 'Login failed')
     }
-
-    if (user.password !== password) {
-      setError('Incorrect password.')
-      return
-    }
-
-    // Save user session
-    localStorage.setItem('loggedInUser', JSON.stringify(user))
-
-    // Role-based redirect
-    if (user.role === 'Employee') navigate('/employee')
-    if (user.role === 'Manager') navigate('/manager')
-    if (user.role === 'Vendor') navigate('/vendor')
-    if (user.role === 'Finance') navigate('/finance')
   }
 
   return (
     <div className="app-container">
-      <h1 className="title">{selectedRole} Login</h1>
+      <h1 className="title">Login</h1>
 
       <form className="login-form" onSubmit={handleLogin}>
         <input
@@ -71,6 +63,17 @@ const LoginPage = () => {
 
         {error && <p className="error-text">{error}</p>}
         <button type="submit">Login</button>
+
+        <p style={{ marginTop: "16px", fontSize: "14px" }}>
+        Don’t have an account?{" "}
+        <span
+          style={{ color: "#2563eb", cursor: "pointer", fontWeight: "500" }}
+          onClick={() => navigate("/register")}
+        >
+          Register instead
+        </span>
+      </p>
+
       </form>
     </div>
   )

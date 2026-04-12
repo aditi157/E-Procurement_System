@@ -1,75 +1,101 @@
 import React, { useEffect, useState } from 'react'
 import CreateAuctionModal from './CreateAuctionModal'
+import ManagerAuctionDetailsModal from './ManagerAuctionDetailsModal'
+import axios from "axios"
 
 const Auctions = () => {
-  const [auctions, setAuctions] = useState(() => {
-    return JSON.parse(localStorage.getItem('auctions')) || []
-  })
+  const [auctions, setAuctions] = useState([])
 
   const [showModal, setShowModal] = useState(false)
   const [editingAuction, setEditingAuction] = useState(null)
 
-  /* ---------- Persist ---------- */
-  useEffect(() => {
-    localStorage.setItem('auctions', JSON.stringify(auctions))
-  }, [auctions])
+  const [selectedAuction, setSelectedAuction] = useState(null)
 
-  /* ---------- Auto status updates ---------- */
+  /* ---------- LOAD ---------- */
+  const loadAuctions = async () => {
+    try {
+      const res = await axios.get(
+        "http://localhost:5000/api/auctions"
+      )
+
+      setAuctions(res.data)
+
+    } catch (err) {
+      console.error(err)
+    }
+  }
+
   useEffect(() => {
-    const now = new Date()
-    setAuctions(prev =>
-      prev.map(a => {
-        if (a.status === 'Scheduled' && new Date(a.startDate) <= now) {
-          return { ...a, status: 'Ongoing' }
-        }
-        if (a.status === 'Ongoing' && new Date(a.endDate) <= now) {
-          return { ...a, status: 'Closed' }
-        }
-        return a
-      })
-    )
+    loadAuctions()
   }, [])
 
-  /* ---------- Actions ---------- */
-  const saveAuction = (auction) => {
-    setAuctions(prev => {
-      const exists = prev.find(a => a.id === auction.id)
-      return exists
-        ? prev.map(a => (a.id === auction.id ? auction : a))
-        : [...prev, auction]
-    })
-  }
+  /* ---------- STATUS FILTERS ---------- */
+  const now = new Date()
 
-  const cancelAuction = (id) => {
-    setAuctions(prev =>
-      prev.map(a =>
-        a.id === id ? { ...a, status: 'Closed' } : a
-      )
-    )
-  }
+  const ongoing = auctions.filter(a =>
+  a.status !== "COMPLETED" &&
+  new Date(a.startDate) <= now &&
+  new Date(a.endDate) > now
+)
 
-  const closeEarly = (id) => {
-    setAuctions(prev =>
-      prev.map(a =>
-        a.id === id ? { ...a, status: 'Closed' } : a
-      )
-    )
-  }
+const scheduled = auctions.filter(a =>
+  a.status !== "COMPLETED" &&
+  new Date(a.startDate) > now
+)
 
-  /* ---------- Sections ---------- */
-  const ongoing = auctions.filter(a => a.status === 'Ongoing')
-  const scheduled = auctions.filter(a => a.status === 'Scheduled')
-  const history = auctions.filter(a => a.status === 'Closed')
+const history = auctions.filter(a =>
+  a.status === "COMPLETED" ||
+  new Date(a.endDate) <= now
+)
 
-  const renderCards = (list, actions) => (
+  /* ---------- CARD RENDER ---------- */
+  const renderCards = (list) => (
     <div className="catalog-grid">
       {list.map(a => (
-        <div key={a.id} className="catalog-card">
+        <div
+          key={a.id}
+          className="catalog-card"
+        >
           <h3>{a.name}</h3>
-          <p><strong>Categories:</strong> {a.categories.join(', ')}</p>
-          <p><strong>Ends:</strong> {new Date(a.endDate).toLocaleString()}</p>
 
-          {actions(a)}
+          <p>
+            <strong>Items:</strong>{" "}
+            {a.items?.map(i => i.name).join(", ")}
+          </p>
+
+          <p>
+            <strong>Ends:</strong>{" "}
+            {new Date(a.endDate).toLocaleString()}
+          </p>
+
+          <div
+  style={{
+    display: "flex",
+    gap: 8,
+    marginTop: 12
+  }}
+>
+  <button
+    onClick={(e) => {
+      e.stopPropagation()
+      setSelectedAuction(a)
+    }}
+  >
+    View
+  </button>
+
+  {a.status !== "COMPLETED" && new Date(a.endDate) > now && (
+    <button
+      onClick={(e) => {
+        e.stopPropagation()
+        setEditingAuction(a)
+        setShowModal(true)
+      }}
+    >
+      Edit
+    </button>
+  )}
+</div>
         </div>
       ))}
     </div>
@@ -77,6 +103,8 @@ const Auctions = () => {
 
   return (
     <div className="section">
+
+      {/* CREATE BUTTON */}
       <div className="top-actions">
         <button
           className="cart-button"
@@ -91,54 +119,52 @@ const Auctions = () => {
 
       {/* ONGOING */}
       <h2>Ongoing Auctions</h2>
-      {ongoing.length === 0 ? <p>No ongoing auctions</p> :
-        renderCards(ongoing, (a) => (
-          <button onClick={() => closeEarly(a.id)}>
-            Close Auction
-          </button>
-        ))
+      {ongoing.length === 0
+        ? <p>No ongoing auctions</p>
+        : renderCards(ongoing)
       }
 
       {/* SCHEDULED */}
-      <h2 style={{ marginTop: 40 }}>Scheduled Auctions</h2>
-      {scheduled.length === 0 ? <p>No scheduled auctions</p> :
-        renderCards(scheduled, (a) => (
-          <>
-            <button
-              onClick={() => {
-                setEditingAuction(a)
-                setShowModal(true)
-              }}
-            >
-              Edit
-            </button>
-            <button
-              style={{ marginTop: 8, background: '#dc2626' }}
-              onClick={() => cancelAuction(a.id)}
-            >
-              Cancel
-            </button>
-          </>
-        ))
+      <h2 style={{ marginTop: 40 }}>
+        Scheduled Auctions
+      </h2>
+      {scheduled.length === 0
+        ? <p>No scheduled auctions</p>
+        : renderCards(scheduled)
       }
 
       {/* HISTORY */}
-      <h2 style={{ marginTop: 40 }}>Auction History</h2>
-      {history.length === 0 ? <p>No past auctions</p> :
-        renderCards(history, () => null)
+      <h2 style={{ marginTop: 40 }}>
+        Auction History
+      </h2>
+      {history.length === 0
+        ? <p>No past auctions</p>
+        : renderCards(history)
       }
 
-      {/* MODAL */}
+      {/* EDIT / CREATE MODAL */}
       {showModal && (
         <CreateAuctionModal
           auction={editingAuction}
-          onClose={() => setShowModal(false)}
-          onSave={(data) => {
-            saveAuction(data)
+          onClose={() => {
             setShowModal(false)
+            setEditingAuction(null)
+            loadAuctions()
           }}
         />
       )}
+
+      {/* VIEW DETAILS / BIDS MODAL */}
+      {selectedAuction && (
+        <ManagerAuctionDetailsModal
+          auction={selectedAuction}
+          onClose={() => {
+            setSelectedAuction(null)
+            loadAuctions()
+          }}
+        />
+      )}
+
     </div>
   )
 }
