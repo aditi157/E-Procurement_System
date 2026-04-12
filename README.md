@@ -180,6 +180,7 @@ backend/
 docs/
   ├── architecture-diagram.png
   └── wireframes/
+```
 =======
 - Employees can submit and track purchase requests without assistance  
 - Managers can review and approve requests efficiently  
@@ -253,4 +254,4 @@ Example feature branch:
 ![Architecture Diagram](docs/design/architecture/architecture_diagram.drawio.png)
 
 See all UI screens in docs/design/UI.
->>>>>>> 5b221acec4584dbf79e72c2e3f834608e2e9b99f
+
