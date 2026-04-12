@@ -10,7 +10,6 @@ The Enterprise Procurement Management System is a web-based application that mod
 
 The system supports multiple user roles such as Employees, Managers, Vendors, and Finance users, each with clearly defined responsibilities and access controls.
 
-This project is currently implemented as a **frontend prototype**, with backend and database layers planned for future phases.
 
 ---
 
@@ -38,7 +37,6 @@ This is a web-based e-procurement platform designed to digitize and streamline a
 
 ## Problem It Solves
 In many organizations, procurement is handled through manual processes such as emails, spreadsheets, and paper forms. These methods are time-consuming, error-prone, and lack transparency. Employees have limited visibility into request status, managers struggle to track approvals, and finance teams face difficulties reconciling orders and invoices. This project addresses these issues by providing a structured and traceable digital procurement workflow.
->>>>>>> 5b221acec4584dbf79e72c2e3f834608e2e9b99f
 
 ---
 
