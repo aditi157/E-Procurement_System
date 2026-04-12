@@ -24,7 +24,9 @@ This system aims to:
 - Improve traceability and accountability
 - Enable structured approvals and vendor interactions
 - Provide visibility across all stakeholders
-=======
+
+---
+
 # E-Procurement Platform – Vision Document
 
 ## Project Name & Overview
@@ -43,7 +45,6 @@ In many organizations, procurement is handled through manual processes such as e
 ## Target Users (Personas)
 
 ### Employee
-<<<<<<< HEAD
 - Creates purchase requests
 - Tracks request status
 
@@ -60,7 +61,6 @@ In many organizations, procurement is handled through manual processes such as e
 ### Finance
 - Reviews invoices
 - Marks payments as completed
-=======
 - Submits purchase requests for work-related items  
 - Tracks approval and order status  
 - Needs a simple and clear interface  
@@ -79,12 +79,10 @@ In many organizations, procurement is handled through manual processes such as e
 - Verifies submitted invoices  
 - Updates payment status  
 - Ensures financial control and record accuracy  
->>>>>>> 5b221acec4584dbf79e72c2e3f834608e2e9b99f
 
 ---
 
 ## Vision Statement
-<<<<<<< HEAD
 
 To provide a scalable, role-based digital procurement system that improves efficiency, transparency, and control over organizational purchasing workflows.
 
@@ -99,7 +97,6 @@ To provide a scalable, role-based digital procurement system that improves effic
 - Order lifecycle management
 - Invoice verification and payment tracking
 - Scalable architecture for future backend integration
-=======
 To provide a simple, transparent, and efficient e-procurement platform that improves control, accountability, and visibility across the entire organizational purchasing lifecycle.
 
 ---
@@ -112,13 +109,10 @@ To provide a simple, transparent, and efficient e-procurement platform that impr
 - Purchase order generation and order tracking  
 - Invoice verification and payment status tracking  
 - Clear audit trail for all procurement activities  
->>>>>>> 5b221acec4584dbf79e72c2e3f834608e2e9b99f
 
 ---
 
 ## Success Metrics
-<<<<<<< HEAD
-
 - Reduction in manual procurement steps
 - Clear visibility of request and order status
 - Structured vendor selection process
@@ -156,7 +150,7 @@ The architecture diagram is included in the `docs/` folder.
 
 ## Repository Structure
 
-```text
+```
 frontend/
   ├── src/
   │   ├── pages/
@@ -181,7 +175,7 @@ docs/
   ├── architecture-diagram.png
   └── wireframes/
 ```
-=======
+
 - Employees can submit and track purchase requests without assistance  
 - Managers can review and approve requests efficiently  
 - Vendors can receive orders and update status correctly  
