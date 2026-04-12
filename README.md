@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # Enterprise Procurement Management System
 
 A role-based web application designed to digitally manage organizational procurement workflows including purchase requests, approvals, vendor selection, auctions, orders, and payments.
