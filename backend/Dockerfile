@@ -1,4 +1,3 @@
-
 FROM node:20
 
 WORKDIR /app
@@ -9,6 +8,8 @@ RUN npm install
 
 COPY . .
 
-EXPOSE 5173
+RUN npx prisma generate
 
-CMD ["npm", "run", "dev", "--", "--host"]
+EXPOSE 5000
+
+CMD ["npm", "run", "dev"]

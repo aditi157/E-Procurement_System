@@ -119,28 +119,33 @@ const history = auctions.filter(a =>
 
       {/* ONGOING */}
       <h2>Ongoing Auctions</h2>
-      {ongoing.length === 0
-        ? <p>No ongoing auctions</p>
-        : renderCards(ongoing)
-      }
+      {ongoing.length === 0 ? (
+        <div className="empty-state">
+          <span className="empty-state-icon">🏷️</span>
+          <strong>No ongoing auctions</strong>
+          Active auctions with open bidding will appear here.
+        </div>
+      ) : renderCards(ongoing)}
 
       {/* SCHEDULED */}
-      <h2 style={{ marginTop: 40 }}>
-        Scheduled Auctions
-      </h2>
-      {scheduled.length === 0
-        ? <p>No scheduled auctions</p>
-        : renderCards(scheduled)
-      }
+      <h2 style={{ marginTop: 40 }}>Scheduled Auctions</h2>
+      {scheduled.length === 0 ? (
+        <div className="empty-state">
+          <span className="empty-state-icon">📅</span>
+          <strong>No scheduled auctions</strong>
+          Upcoming auctions will appear here.
+        </div>
+      ) : renderCards(scheduled)}
 
       {/* HISTORY */}
-      <h2 style={{ marginTop: 40 }}>
-        Auction History
-      </h2>
-      {history.length === 0
-        ? <p>No past auctions</p>
-        : renderCards(history)
-      }
+      <h2 style={{ marginTop: 40 }}>Auction History</h2>
+      {history.length === 0 ? (
+        <div className="empty-state">
+          <span className="empty-state-icon">🗂️</span>
+          <strong>No past auctions</strong>
+          Completed auctions will appear here.
+        </div>
+      ) : renderCards(history)}
 
       {/* EDIT / CREATE MODAL */}
       {showModal && (

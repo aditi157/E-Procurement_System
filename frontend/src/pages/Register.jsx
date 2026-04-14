@@ -33,17 +33,16 @@ export default function Register() {
   }
 
   return (
-    <div style={styles.container}>
-      <div style={styles.card}>
-        <h2 style={styles.title}>Register</h2>
+    <div className="app-container">
+      <div className="register-card">
+        <h2 className="title">Register</h2>
 
-        <form onSubmit={handleSubmit} style={styles.form}>
+        <form onSubmit={handleSubmit}>
           <input
             name="name"
             placeholder="Full Name"
             onChange={handleChange}
             required
-            style={styles.input}
           />
 
           <input
@@ -52,7 +51,6 @@ export default function Register() {
             placeholder="Email"
             onChange={handleChange}
             required
-            style={styles.input}
           />
 
           <input
@@ -61,77 +59,30 @@ export default function Register() {
             placeholder="Password"
             onChange={handleChange}
             required
-            style={styles.input}
           />
-
-          <select
-            name="role"
-            onChange={handleChange}
-            style={styles.input}
-          >
+          <div>
+          <select name="role" onChange={handleChange}>
             <option value="EMPLOYEE">Employee</option>
             <option value="MANAGER">Manager</option>
             <option value="VENDOR">Vendor</option>
             <option value="FINANCE">Finance</option>
           </select>
-
-          <button type="submit" style={styles.button}>
+          </div>
+          <button type="submit" className="register-btn">
             Register
           </button>
         </form>
 
-        <p style={styles.link}>
+        <p style={{ marginTop: "16px", textAlign: "center", fontSize: "14px", color: "var(--text-secondary)" }}>
           Already have an account?{" "}
-          <span onClick={() => navigate("/login")} style={{ color: "#2563eb", cursor: "pointer" }}>
+          <span
+            onClick={() => navigate("/login")}
+            style={{ color: "var(--accent)", cursor: "pointer", fontWeight: "600" }}
+          >
             Login
           </span>
         </p>
       </div>
     </div>
   )
-}
-
-const styles = {
-  container: {
-    height: "100vh",
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#f4f6f8"
-  },
-  card: {
-    width: "350px",
-    padding: "30px",
-    backgroundColor: "#fff",
-    borderRadius: "10px",
-    boxShadow: "0 4px 20px rgba(0,0,0,0.1)"
-  },
-  title: {
-    marginBottom: "20px",
-    textAlign: "center",
-    color: "#1e293b"
-  },
-  form: {
-    display: "flex",
-    flexDirection: "column",
-    gap: "12px"
-  },
-  input: {
-    padding: "10px",
-    borderRadius: "6px",
-    border: "1px solid #ccc"
-  },
-  button: {
-    padding: "10px",
-    backgroundColor: "#2563eb",
-    color: "#fff",
-    border: "none",
-    borderRadius: "6px",
-    cursor: "pointer"
-  },
-  link: {
-    marginTop: "15px",
-    textAlign: "center",
-    fontSize: "14px"
-  }
 }

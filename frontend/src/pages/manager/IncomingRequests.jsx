@@ -9,10 +9,12 @@ const IncomingRequests = ({ requests, onApprove, onReject }) => {
   return (
     <>
       <div className="section">
-        <h2>Incoming Requests</h2>
-
         {requests.length === 0 ? (
-          <p>No incoming requests.</p>
+          <div className="empty-state">
+            <span className="empty-state-icon">📥</span>
+            <strong>No incoming requests</strong>
+            New purchase requests from employees will appear here.
+          </div>
         ) : (
           <table className="records-table">
             <thead>
@@ -25,21 +27,15 @@ const IncomingRequests = ({ requests, onApprove, onReject }) => {
             </thead>
             <tbody>
               {requests.map(r => (
-                <tr
-                  key={r.id}
-                  style={{ cursor: 'pointer' }}
-                  onClick={() => setSelected(r)}
-                >
+                <tr key={r.id} style={{ cursor: 'pointer' }} onClick={() => setSelected(r)}>
                   <td>{r.id}</td>
                   <td>{r.requestedBy}</td>
-                  <td>
-                    {new Date(r.createdAt).toLocaleDateString()}
-                  </td>
-                  <td onClick={(e) => e.stopPropagation()}>
-                    <button onClick={() => onApprove(r.id)}>
+                  <td>{new Date(r.createdAt).toLocaleDateString()}</td>
+                  <td onClick={e => e.stopPropagation()}>
+                    <button className="primary-btn btn-success" style={{ marginRight: 8 }} onClick={() => onApprove(r.id)}>
                       Approve
-                    </button><pre> </pre>
-                    <button onClick={() => onReject(r.id)}>
+                    </button>
+                    <button className="primary-btn btn-danger" onClick={() => onReject(r.id)}>
                       Reject
                     </button>
                   </td>
@@ -50,57 +46,35 @@ const IncomingRequests = ({ requests, onApprove, onReject }) => {
         )}
       </div>
 
-      {/* 🔥 MODAL */}
       {selected && (
-        <div
-          className="modal-overlay"
-          onClick={() => setSelected(null)}
-        >
-          <div
-            className="modal-card"
-            onClick={(e) => e.stopPropagation()}
-          >
+        <div className="modal-overlay" onClick={() => setSelected(null)}>
+          <div className="modal-card" onClick={e => e.stopPropagation()}>
             <h2>Request Details</h2>
-
             <p><strong>ID:</strong> {selected.id}</p>
             <p><strong>Employee:</strong> {selected.requestedBy}</p>
-            <p>
-              <strong>Date:</strong>{' '}
-              {new Date(selected.createdAt).toLocaleString()}
-            </p>
-
-            <h3 style={{ marginTop: '16px' }}>Items</h3>
+            <p><strong>Submitted:</strong> {new Date(selected.createdAt).toLocaleString()}</p>
+            <h3>Items</h3>
             <table className="cart-table">
               <tbody>
                 {selected.items.map(i => (
                   <tr key={i.id}>
                     <td>{i.name}</td>
-                    <td>{i.quantity}</td>
-                    <td>₹{i.price * i.quantity}</td>
+                    <td>× {i.quantity}</td>
+                    <td>₹{(i.price * i.quantity).toLocaleString('en-IN')}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
-
-            <p className="cart-total">
-              Total: ₹{totalAmount(selected.items)}
-            </p>
-
+            <p className="cart-total">Total: ₹{totalAmount(selected.items).toLocaleString('en-IN')}</p>
             <div className="modal-actions">
-              <button className="primary-btn" onClick={() => onApprove(selected.id)}>
+              <button className="primary-btn btn-success" onClick={() => { onApprove(selected.id); setSelected(null) }}>
                 Approve
               </button>
-              <button className="primary-btn" onClick={() => onReject(selected.id)}>
+              <button className="primary-btn btn-danger" onClick={() => { onReject(selected.id); setSelected(null) }}>
                 Reject
               </button>
             </div>
-
-            <button
-              className="modal-close"
-              onClick={() => setSelected(null)}
-            >
-              Close
-            </button>
+            <button className="modal-close" onClick={() => setSelected(null)}>Close</button>
           </div>
         </div>
       )}

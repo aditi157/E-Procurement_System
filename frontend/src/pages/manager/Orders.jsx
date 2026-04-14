@@ -3,6 +3,15 @@ import CreateDraftModal from './CreateDraftModal'
 import OrderDetailsModal from './OrderDetailsModal'
 import axios from "axios"
 
+const statusClass = (s = '') => {
+  const map = {
+    draft: 'badge-draft', submitted: 'badge-submitted',
+    accepted: 'badge-accepted', rejected: 'badge-rejected',
+    delivered: 'badge-delivered', cancelled: 'badge-cancelled',
+  }
+  return map[s.toLowerCase()] || 'badge-draft'
+}
+
 const Orders = () => {
   const [orders, setOrders] = useState([])
   const [editingDraft, setEditingDraft] = useState(null)
@@ -110,70 +119,77 @@ const historyOrders = orders.filter(o =>
       <div className="section">
         <h2>Orders</h2>
 
-        <table className="records-table">
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Status</th>
-              <th>Vendor</th>
-              <th>Created</th>
-            </tr>
-          </thead>
-          <tbody>
-            {activeOrders.map(o => (
-              <tr
-                key={o.id}
-                style={{ cursor: "pointer" }}
-                onClick={() => setSelectedOrder(o)}
-              >
-                <td>{o.name}</td>
-                <td>{o.status}</td>
-                <td>{o.vendor || "-"}</td>
-                <td>
-                  {new Date(o.createdAt).toLocaleDateString()}
-                </td>
+        {activeOrders.length === 0 ? (
+          <div className="empty-state">
+            <span className="empty-state-icon">📦</span>
+            <strong>No active orders</strong>
+            Create a draft to get started.
+          </div>
+        ) : (
+          <table className="records-table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Status</th>
+                <th>Vendor</th>
+                <th>Created</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {activeOrders.map(o => (
+                <tr
+                  key={o.id}
+                  style={{ cursor: "pointer" }}
+                  onClick={() => setSelectedOrder(o)}
+                >
+                  <td>{o.name}</td>
+                  <td><span className={`badge ${statusClass(o.status)}`}>{o.status}</span></td>
+                  <td>{o.vendor || "-"}</td>
+                  <td>{new Date(o.createdAt).toLocaleDateString()}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
       </div>
 
       {/* HISTORY */}
       <div className="section">
-  <h2>Order History</h2>
+        <h2>Order History</h2>
 
-  {historyOrders.length === 0 ? (
-    <p>No completed orders yet.</p>
-  ) : (
-    <table className="records-table">
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Status</th>
-          <th>Vendor</th>
-          <th>Created</th>
-        </tr>
-      </thead>
-
-      <tbody>
-        {historyOrders.map(o => (
-          <tr
-            key={o.id}
-            style={{ cursor: "pointer" }}
-            onClick={() => setSelectedOrder(o)}
-          >
-            <td>{o.name}</td>
-            <td>{o.status}</td>
-            <td>{o.vendor || "-"}</td>
-            <td>
-              {new Date(o.createdAt).toLocaleDateString()}
-            </td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
-  )}
-</div>
+        {historyOrders.length === 0 ? (
+          <div className="empty-state">
+            <span className="empty-state-icon">🗂️</span>
+            <strong>No completed orders yet</strong>
+            Delivered and cancelled orders will appear here.
+          </div>
+        ) : (
+          <table className="records-table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Status</th>
+                <th>Vendor</th>
+                <th>Created</th>
+              </tr>
+            </thead>
+            <tbody>
+              {historyOrders.map(o => (
+                <tr
+                  key={o.id}
+                  style={{ cursor: "pointer" }}
+                  onClick={() => setSelectedOrder(o)}
+                >
+                  <td>{o.name}</td>
+                  <td><span className={`badge ${statusClass(o.status)}`}>{o.status}</span></td>
+                  <td>{o.vendor || "-"}</td>
+                  <td>{new Date(o.createdAt).toLocaleDateString()}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </div>
 
       {/* DETAILS MODAL */}
       {selectedOrder && (
@@ -207,7 +223,7 @@ const historyOrders = orders.filter(o =>
             </select>
 
             <div className="modal-actions">
-              <button class="primary-btn" onClick={submitAndAssign}>
+              <button className="primary-btn" onClick={submitAndAssign}>
                 Submit & Assign
               </button>
 

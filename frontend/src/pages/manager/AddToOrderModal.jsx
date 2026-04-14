@@ -125,11 +125,11 @@ const AddToOrderModal = ({ request, onClose }) => {
                   Add to Selected Order
                 </button>
               ) : (
-                <button onClick={createNewOrder}>
+                <button className="primary-btn" onClick={createNewOrder}>
                   Create New Order
                 </button>
               )}
-
+              
               <button className="modal-close" onClick={onClose}>
                 Cancel
               </button>

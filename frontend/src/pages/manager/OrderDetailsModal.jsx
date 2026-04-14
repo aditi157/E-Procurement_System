@@ -127,7 +127,7 @@ const OrderDetailsModal = ({
         <div className="modal-actions">
 
           {order.status === "draft" && (
-            <button onClick={() => onAssign(order)}>
+            <button className="primary-btn" onClick={() => onAssign(order)}>
               Submit & Assign
             </button>
           )}
