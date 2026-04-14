@@ -34,21 +34,21 @@ jobs:
 
       # ---------- BACKEND ----------
       - name: Install Backend Dependencies
-  working-directory: ./backend
-  run: npm ci
+        working-directory: ./backend
+        run: npm ci
 
-- name: Generate Prisma Client
-  working-directory: ./backend
-  env:
-    DATABASE_URL: "file:./dev.db"
-  run: npx prisma generate
+      - name: Generate Prisma Client
+        working-directory: ./backend
+        env:
+          DATABASE_URL: "file:./dev.db"
+        run: npx prisma generate
 
-- name: Validate Prisma Schema
-  working-directory: ./backend
-  env:
-    DATABASE_URL: "file:./dev.db"
-  run: npx prisma validate
-  
+      - name: Validate Prisma Schema
+        working-directory: ./backend
+        env:
+          DATABASE_URL: "file:./dev.db"
+        run: npx prisma validate
+
       # ---------- DOCKER ----------
       - name: Build Docker Images
         run: docker compose build
