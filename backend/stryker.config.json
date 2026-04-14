@@ -1,0 +1,28 @@
+{
+  "$schema": "./node_modules/@stryker-mutator/core/schema/stryker-schema.json",
+  "testRunner": "jest",
+
+  "jest": {
+    "projectType": "custom",
+    "configFile": "jest.config.js",
+    "enableFindRelatedTests": false
+  },
+
+  "mutate": [
+  "src/controllers/employee.controller.js",
+  "src/controllers/manager.controller.js",
+  "src/controllers/order.controller.js"
+],
+
+  "reporters": [
+    "html",
+    "clear-text",
+    "progress"
+  ],
+
+  "coverageAnalysis": "off",
+
+  "testRunnerNodeArgs": [
+    "--experimental-vm-modules"
+  ]
+}

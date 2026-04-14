@@ -52,3 +52,17 @@ jobs:
       # ---------- DOCKER ----------
       - name: Build Docker Images
         run: docker compose build
+
+        - name: Lint Frontend
+          working-directory: ./frontend
+          run: npm run lint
+
+        - name: Lint Backend
+          working-directory: ./backend
+          run: npm run lint
+
+      - name: Run Backend Tests
+          working-directory: ./backend
+          env:
+            DATABASE_URL: "file:./test.db"
+          run: npm test
