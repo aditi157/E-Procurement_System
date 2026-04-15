@@ -1,73 +1,70 @@
 import React, { useEffect, useState } from "react"
 import axios from "axios"
 
-const CreateInvoiceModal = ({ onClose }) => {
+const CreateInvoiceModal = ({ onClose, onCreated }) => {
   const [orders, setOrders] = useState([])
   const [selectedOrderId, setSelectedOrderId] = useState("")
   const [invoiceNumber, setInvoiceNumber] = useState("")
   const [dueDate, setDueDate] = useState("")
   const [notes, setNotes] = useState("")
+  const [error, setError] = useState("")
+  const [loading, setLoading] = useState(false)
 
-  
-  useEffect(() => {
-    loadOrders()
-  }, [])
+  useEffect(() => { loadOrders() }, [])
 
-//   const loadOrders = async () => {
-//     const res = await axios.get(
-//       "http://localhost:5000/api/vendor/invoice-eligible-orders"
-//     )
-
-//     setOrders(res.data)
-//   }
-
-const loadOrders = async () => {
-  try {
-    const token = localStorage.getItem("token")
-
-    const res = await axios.get(
-      "http://localhost:5000/api/vendor/invoice-eligible-orders",
-      {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      }
-    )
-
-    setOrders(res.data)
-
-  } catch (err) {
-    console.error("LOAD ELIGIBLE ORDERS ERROR:", err)
+  const loadOrders = async () => {
+    try {
+      const token = localStorage.getItem("token")
+      const res = await axios.get(
+        "http://localhost:5000/api/vendor/invoice-eligible-orders",
+        { headers: { Authorization: `Bearer ${token}` } }
+      )
+      setOrders(res.data)
+    } catch (err) {
+      console.error("LOAD ELIGIBLE ORDERS ERROR:", err)
+      setError("Could not load eligible orders.")
+    }
   }
-}
 
   const submitInvoice = async () => {
+    if (!selectedOrderId) { setError("Please select an order."); return }
+    if (!invoiceNumber)   { setError("Please enter an invoice number."); return }
+
+    setError("")
+    setLoading(true)
+
     try {
-      await axios.post(
-        `http://localhost:5000/api/vendor/orders/${selectedOrderId}/invoice`,
-        {
-          invoiceNumber,
-          dueDate,
-          notes
-        }
-      )
+      const token = localStorage.getItem("token")
 
-      alert("Invoice created")
+await axios.post(
+  `http://localhost:5000/api/vendor/orders/${selectedOrderId}/invoice`,
+  { invoiceNumber, dueDate, notes },
+  {
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  }
+)
+      onCreated?.()
       onClose()
-
     } catch (err) {
       console.error(err)
-      alert("Failed")
+      setError(err.response?.data?.error || "Failed to submit invoice.")
+    } finally {
+      setLoading(false)
     }
   }
 
   return (
     <div className="modal-overlay" onClick={onClose}>
-      <div
-        className="modal-card modal-large"
-        onClick={e => e.stopPropagation()}
-      >
+      <div className="modal-card modal-large" onClick={e => e.stopPropagation()}>
         <h2>Create Invoice</h2>
+
+        {orders.length === 0 && (
+          <div className="info-box">
+            No delivered orders are available for invoicing yet.
+          </div>
+        )}
 
         <div className="form-group">
           <label>Select Delivered Order</label>
@@ -77,9 +74,7 @@ const loadOrders = async () => {
           >
             <option value="">Choose Order</option>
             {orders.map(o => (
-              <option key={o.id} value={o.id}>
-                {o.name}
-              </option>
+              <option key={o.id} value={o.id}>{o.name}</option>
             ))}
           </select>
         </div>
@@ -89,6 +84,7 @@ const loadOrders = async () => {
           <input
             value={invoiceNumber}
             onChange={e => setInvoiceNumber(e.target.value)}
+            placeholder="e.g. INV-2024-001"
           />
         </div>
 
@@ -104,20 +100,24 @@ const loadOrders = async () => {
         <div className="form-group">
           <label>Notes / Terms</label>
           <textarea
-            rows="4"
+            rows="3"
             value={notes}
             onChange={e => setNotes(e.target.value)}
+            placeholder="Optional payment terms or notes"
           />
         </div>
 
-        <div className="modal-actions">
-          <button className="primary-btn" onClick={submitInvoice}>
-            Submit Invoice
-          </button>
+        {error && <p className="error-text">{error}</p>}
 
-          <button className="modal-close" onClick={onClose}>
-            Cancel
+        <div className="modal-actions">
+          <button
+            className="primary-btn btn-success"
+            onClick={submitInvoice}
+            disabled={loading}
+          >
+            {loading ? "Submitting…" : "Submit Invoice"}
           </button>
+          <button className="modal-close" onClick={onClose}>Cancel</button>
         </div>
       </div>
     </div>

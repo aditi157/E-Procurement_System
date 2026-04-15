@@ -53,11 +53,26 @@ const VendorDashboard = () => {
     toast('Order rejected', 'error')
   }
 
+  // const markDelivered = async (orderId) => {
+  //   await axios.post(`http://localhost:5000/api/vendor/orders/${orderId}/deliver`)
+  //   loadOrders()
+  //   toast('Order marked as delivered', 'success')
+  // }
+
   const markDelivered = async (orderId) => {
-    await axios.post(`http://localhost:5000/api/vendor/orders/${orderId}/deliver`)
-    loadOrders()
+  try {
+    await axios.post(
+      `http://localhost:5000/api/vendor/orders/${orderId}/deliver`
+    )
+
+    await loadOrders()
     toast('Order marked as delivered', 'success')
+
+  } catch (err) {
+    console.error("DELIVER ERROR:", err.response?.data || err)
+    toast(err.response?.data?.error || 'Failed to mark delivered', 'error')
   }
+}
 
   const activeOrders  = orders.filter(o => ['SUBMITTED','ACCEPTED'].includes(o.status))
   const historyOrders = orders.filter(o => ['REJECTED','DELIVERED'].includes(o.status))
@@ -146,13 +161,12 @@ const VendorDashboard = () => {
               </div>
             ) : (
               <table className="records-table">
-                <thead><tr><th>Order</th><th>Status</th><th>Items</th></tr></thead>
+                <thead><tr><th>Order</th><th>Status</th></tr></thead>
                 <tbody>
                   {historyOrders.map(o => (
                     <tr key={o.id} style={{ cursor: 'pointer' }} onClick={() => setSelectedOrder(o)}>
                       <td>{o.name}</td>
                       <td><span className={`badge ${statusClass(o.status)}`}>{o.status}</span></td>
-                      <td>{o.items.map(i => i.name).join(', ')}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -177,7 +191,7 @@ const VendorDashboard = () => {
                   {activeAuctions.map(a => (
                     <tr key={a.id} onClick={() => setSelectedAuction(a)} style={{ cursor: 'pointer' }}>
                       <td>{a.name}</td>
-                      <td>{a.manager?.orgName || '—'}</td>
+                      <td>{a.manager?.orgName || a.manager?.orgName || '—'}</td>
                       <td>{new Date(a.endDate).toLocaleString()}</td>
                       <td>{new Date(a.deliveryDate).toLocaleDateString()}</td>
                     </tr>
@@ -199,7 +213,7 @@ const VendorDashboard = () => {
                   {auctionHistory.map(a => (
                     <tr key={a.id} onClick={() => setSelectedAuction(a)} style={{ cursor: 'pointer' }}>
                       <td>{a.name}</td>
-                      <td>{a.manager?.orgName || '—'}</td>
+                      <td>{a.manager?.orgName || a.manager?.orgName || '—'}</td>
                       <td><span className={`badge ${statusClass(a.status)}`}>{a.status}</span></td>
                       <td>{new Date(a.endDate).toLocaleString()}</td>
                     </tr>
@@ -213,10 +227,10 @@ const VendorDashboard = () => {
         {activeMenu === 'invoices' && <VendorInvoices />}
 
         {activeMenu === 'profile' && (
-          <div className="profile-card">
-            <h2>{user?.name}</h2>
-            <p><strong>Email:</strong> {user?.email}</p>
-            <p><strong>Role:</strong>  {user?.role}</p>
+          <div className="section">
+            <p><strong>Name:</strong>   {user?.name}</p>
+            <p><strong>Email:</strong>  {user?.email}</p>
+            <p><strong>Role:</strong>   {user?.role}</p>
             <p><strong>Orders Fulfilled:</strong> {historyOrders.filter(o => o.status === 'DELIVERED').length}</p>
             <p><strong>Active Orders:</strong> {activeOrders.length}</p>
             <p><strong>Auction Invites:</strong> {auctions.length}</p>

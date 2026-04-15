@@ -2,12 +2,14 @@ import request from "supertest"
 import app from "../src/app.js"
 
 describe("Authentication", () => {
+  const email = `auth-${Date.now()}@test.com`
+
   test("Register user", async () => {
     const res = await request(app)
       .post("/api/auth/register")
       .send({
         name: "Auth Test",
-        email: "auth@test.com",
+        email,
         password: "password123",
         role: "EMPLOYEE"
       })
@@ -19,7 +21,7 @@ describe("Authentication", () => {
     const res = await request(app)
       .post("/api/auth/login")
       .send({
-        email: "auth@test.com",
+        email,
         password: "password123"
       })
 
@@ -31,8 +33,8 @@ describe("Authentication", () => {
     const res = await request(app)
       .post("/api/auth/login")
       .send({
-        email: "auth@test.com",
-        password: "wrong"
+        email,
+        password: "wrongpassword"
       })
 
     expect(res.statusCode).toBe(400)

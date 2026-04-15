@@ -6,7 +6,7 @@ const BidDetailsModal = ({ bid, onClose, onSelect }) => {
       <div className="modal-card" onClick={e => e.stopPropagation()}>
         <h2>Bid Details</h2>
 
-        <p><strong>Vendor:</strong> {bid.vendor.organizationName || bid.vendor.name}</p>
+        <p><strong>Vendor:</strong> {bid.vendor.orgName || bid.vendor.name}</p>
         <p><strong>Amount:</strong> ₹{bid.amount}</p>
         <p><strong>Delivery:</strong> {new Date(bid.deliveryDate).toLocaleDateString()}</p>
 

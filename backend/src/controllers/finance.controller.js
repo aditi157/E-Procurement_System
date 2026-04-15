@@ -14,7 +14,7 @@ export const getPendingInvoices = async (req, res) => {
         vendorOrder: {
           order: {
             manager: {
-              organizationName: financeUser.organizationName
+              orgName: financeUser.orgName
             }
           }
         }

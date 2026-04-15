@@ -4,23 +4,25 @@
 
   "jest": {
     "projectType": "custom",
-    "configFile": "jest.config.js",
-    "enableFindRelatedTests": false
+    "configFile": "jest.config.js"
   },
 
   "mutate": [
-  "src/controllers/employee.controller.js",
-  "src/controllers/manager.controller.js",
-  "src/controllers/order.controller.js"
-],
+    "src/controllers/**/*.js"
+  ],
+
+  "timeoutMS": 15000,
+  "timeoutFactor": 3,
+
+  "maxConcurrentTestRunners": 2,
+
+  "coverageAnalysis": "off",
 
   "reporters": [
     "html",
     "clear-text",
     "progress"
   ],
-
-  "coverageAnalysis": "off",
 
   "testRunnerNodeArgs": [
     "--experimental-vm-modules"

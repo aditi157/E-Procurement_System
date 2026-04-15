@@ -85,7 +85,7 @@ const ManagerAuctionDetailsModal = ({ auction, onClose }) => {
                     onClick={() => setSelectedBid(b)}
                     style={{ cursor: "pointer" }}
                   >
-                    <td>{b.vendor.organizationName || b.vendor.name || b.vendor.email}</td>
+                    <td>{b.vendor.orgName || b.vendor.name || b.vendor.email}</td>
                     <td>₹{b.amount}</td>
                     <td>{new Date(b.deliveryDate).toLocaleDateString()}</td>
                     <td>{b.status}</td>

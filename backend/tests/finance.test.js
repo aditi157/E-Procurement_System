@@ -49,10 +49,12 @@ describe("Finance Invoice Processing", () => {
   })
 
   afterAll(async () => {
+  if (financeUser) {
     await prisma.user.delete({
       where: { id: financeUser.id }
     })
+  }
 
-    await prisma.$disconnect()
-  })
+  await prisma.$disconnect()
+})
 })

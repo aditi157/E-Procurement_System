@@ -13,7 +13,21 @@ const VendorOrderModal = ({ order, onClose }) => {
         <h2>{order.name}</h2>
 
         <p><strong>Status:</strong> {order.status}</p>
+<p><strong>Manager Email:</strong> {order.manager?.email || "—"}</p>
 
+
+
+<p>
+  <strong>Delivered At:</strong>{" "}
+  {order.deliveredAt
+    ? new Date(order.deliveredAt).toLocaleString()
+    : "Not delivered yet"}
+</p>
+
+<p>
+  <strong>Created:</strong>{" "}
+  {new Date(order.createdAt).toLocaleString()}
+</p>
         <h3>Items</h3>
         <table className="cart-table">
           <tbody>

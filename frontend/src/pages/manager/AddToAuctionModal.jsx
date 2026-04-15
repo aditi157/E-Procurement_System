@@ -111,16 +111,16 @@ const AddToAuctionModal = ({ request, onClose }) => {
 
             <div className="modal-actions">
               {mode === "existing" ? (
-                <button onClick={addToExisting}>
+                <button className="primary-btn" onClick={addToExisting}>
                   Add to Auction
                 </button>
               ) : (
-                <button onClick={createNewAuction}>
+                <button className="primary-btn" onClick={createNewAuction}>
                   Create Auction
                 </button>
               )}
 
-              <button onClick={onClose}>Cancel</button>
+              <button className="modal-close" onClick={onClose}>Cancel</button>
             </div>
           </>
         )}

@@ -11,7 +11,7 @@ describe("Vendor Order Workflow", () => {
     vendor = await prisma.user.create({
       data: {
         name: "Vendor Test",
-        email: "vendor@test.com",
+        email: `vendor-${Date.now()}@test.com`,
         password: "pass",
         role: "VENDOR",
         orgName: "Test Org"
@@ -21,7 +21,7 @@ describe("Vendor Order Workflow", () => {
     manager = await prisma.user.create({
       data: {
         name: "Manager Test",
-        email: "manager-vendor@test.com",
+        email: `manager-vendor-${Date.now()}@test.com`,
         password: "pass",
         role: "MANAGER",
         orgName: "Test Org"

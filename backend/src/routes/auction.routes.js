@@ -7,7 +7,8 @@ import {
   updateAuction,
   submitBid,
   selectBid,
-  getAuctionBids
+  getAuctionBids,
+  addToAuction          // FIX: was never imported or registered
 } from "../controllers/auction.controller.js"
 
 const router = express.Router()
@@ -20,13 +21,13 @@ router.post("/", createAuction)
 /* INVITE */
 router.post("/:auctionId/invite", inviteVendor)
 
-/* SEARCH VENDORS */
+/* ADD REQUEST TO EXISTING AUCTION — FIX: route was missing */
+router.post("/:auctionId/add", addToAuction)
 
 router.put("/:auctionId", updateAuction)
 
 router.post("/:auctionId/bid", submitBid)
 router.post("/:auctionId/select-bid/:bidId", selectBid)
 router.get("/:auctionId/bids", getAuctionBids)
-
 
 export default router

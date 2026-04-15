@@ -21,7 +21,7 @@ router.post("/orders/:orderId/deliver", deliverOrder)
 
 router.get("/auctions/:vendorId", getVendorAuctions)
 router.get("/bids/:vendorId", getVendorBids)
-router.post("/orders/:orderId/invoice", submitInvoice)
+router.post("/orders/:orderId/invoice",verifyToken, submitInvoice)
 router.get(
   "/invoice-eligible-orders",
   verifyToken,

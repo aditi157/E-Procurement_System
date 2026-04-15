@@ -66,7 +66,7 @@ const AuctionDetailsModal = ({ auction, onClose }) => {
       <tbody>
         {bids.map(b => (
           <tr key={b.id}>
-            <td>{b.vendor.organizationName}</td>
+            <td>{b.vendor.orgName}</td>
             <td>₹{b.amount}</td>
             <td>{new Date(b.deliveryDate).toLocaleDateString()}</td>
             <td>{b.notes}</td>

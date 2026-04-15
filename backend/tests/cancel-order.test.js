@@ -7,7 +7,7 @@ describe("Cancel Order", () => {
     const manager = await prisma.user.create({
       data: {
         name: "Cancel Manager",
-        email: "cancel@test.com",
+        email:  `cancel-${Date.now()}@test.com`,
         password: "pass",
         role: "MANAGER",
         orgName: "Test Org"

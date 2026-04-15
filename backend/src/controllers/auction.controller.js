@@ -18,25 +18,32 @@ export const createAuction = async (req, res) => {
     } = req.body
 
     const auction = await prisma.auction.create({
-      data: {
-        name,
-        description,
-        status: "ONGOING",
-        startDate: startDate ? new Date(startDate) : new Date(),
-        endDate: new Date(endDate),
-        deliveryDate: new Date(deliveryDate),
+  data: {
+    name,
+    description,
+    status: "ONGOING",
 
-        managerId,
-        requestId,
+    startDate: startDate ? new Date(startDate) : new Date(),
 
-        items: {
-          create: items.map(i => ({
-            name: i.name,
-            quantity: i.quantity
-          }))
-        }
-      }
-    })
+    endDate: endDate
+      ? new Date(endDate)
+      : new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+
+    deliveryDate: deliveryDate
+      ? new Date(deliveryDate)
+      : new Date(Date.now() + 14 * 24 * 60 * 60 * 1000),
+
+    managerId,
+    requestId,
+
+    items: {
+      create: items.map(i => ({
+        name: i.name,
+        quantity: i.quantity
+      }))
+    }
+  }
+})
 
     res.json(auction)
 

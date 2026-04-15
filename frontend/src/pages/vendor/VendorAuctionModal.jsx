@@ -45,7 +45,7 @@ const VendorAuctionModal = ({ auction, onClose }) => {
 
           <p>
             <strong>Organization:</strong>{" "}
-            {auction.manager?.organizationName || "-"}
+            {auction.manager?.orgName || "-"}
           </p>
 
           <p>
